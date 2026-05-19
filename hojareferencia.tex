@@ -1,0 +1,93 @@
+\documentclass[10pt,portrait]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[margin=1.5cm]{geometry}
+\usepackage{multicol}
+\usepackage{xcolor}
+\usepackage{titlesec}
+
+\definecolor{ucblue}{HTML}{0038A8}
+
+\titleformat{\section}{\large\bfseries\color{black}}{}{0em}{}[\titlerule]
+\titleformat{\subsection}{\normalsize\bfseries\color{black}}{}{0em}{}
+
+\begin{document}
+\pagestyle{empty}
+
+% --- ENCABEZADO ---
+\begin{center}
+    {\large \textbf{Universidad de Carabobo}} \\
+    {\large \textbf{Facultad Experimental de Ciencias y Tecnología}} \\[0.5em]
+    {\huge \textbf{Hoja de Referencia MIPS32}} \\[0.3em]
+    {\large \textbf{Christian Báez}} \\[0.3em]
+    {\large \textbf{\color{ucblue}Categorías de Instrucciones}} \\[0.5em]
+\end{center}
+
+\vspace{0.4cm}
+
+\begin{multicols}{2}
+
+% --- SECCIÓN 1 ---
+\section*{1. Carga y Almacenamiento}
+\begin{itemize}
+    \item \textbf{lw \$t0, offset(\$s1)}: Carga palabra desde memoria.
+    \item \textbf{sw \$t0, offset(\$s1)}: Almacena palabra en memoria.
+    \item \textbf{lb / sb}: Carga/Almacena byte (con signo).
+    \item \textbf{lbu}: Carga byte sin signo.
+    \item \textbf{la \$t0, etiqueta}: Carga dirección.
+    \item \textbf{li \$t0, 10}: Carga valor inmediato.
+\end{itemize}
+
+% --- SECCIÓN 2 ---
+\section*{2. Aritméticas}
+\begin{itemize}
+    \item \textbf{add \$t0, \$t1, \$t2}: Suma con overflow.
+    \item \textbf{addu \$t0, \$t1, \$t2}: Suma sin overflow.
+    \item \textbf{sub \$t0, \$t1, \$t2}: Resta con overflow.
+    \item \textbf{subu \$t0, \$t1, \$t2}: Resta sin overflow.
+    \item \textbf{mult \$s1, \$s2}: Multiplica registros.
+    \item \textbf{mflo / mfhi}: Copia parte baja / alta.
+    \item \textbf{msub}: Resta producto del resultado.
+    \item \textbf{div \$s1, \$s2}: División.
+\end{itemize}
+
+% --- SECCIÓN 3 ---
+\section*{3. Lógicas}
+\begin{itemize}
+    \item \textbf{and \$t0, \$t1, \$t2}: AND bit a bit.
+    \item \textbf{or \$t0, \$t1, \$t2}: OR bit a bit.
+    \item \textbf{xor \$t0, \$t1, \$t2}: XOR bit a bit.
+    \item \textbf{nor \$t0, \$t1, \$t2}: NOR bit a bit.
+    \item \textbf{andi \$t0, \$s1, 100}: AND con cte.
+    \item \textbf{move \$t1, \$t2}: Copia registros.
+\end{itemize}
+
+% --- SECCIÓN 4 ---
+\section*{4. Desplazamientos}
+\begin{itemize}
+    \item \textbf{sll \$t0, \$s1, 4}: Desplazamiento lógico izq.
+    \item \textbf{srl \$t0, \$s1, 4}: Desplazamiento lógico der.
+    \item \textbf{sra \$t0, \$s1, 4}: Desp. aritmético der.
+\end{itemize}
+
+% --- SECCIÓN 5 ---
+\section*{5. Control de Flujo}
+\begin{itemize}
+    \item \textbf{beq \$t0, \$t1, etiqueta}: Salta si es igual.
+    \item \textbf{bne \$t0, \$t1, etiqueta}: Salta si no es igual.
+    \item \textbf{j etiqueta}: Salto incondicional.
+    \item \textbf{jal etiqueta}: Salto y enlace (función).
+    \item \textbf{jr \$ra}: Retorno de función.
+\end{itemize}
+
+% --- SECCIÓN 6 ---
+\section*{6. Syscalls (Servicios del Sistema)}
+\begin{itemize}
+    \item \textbf{\$v0 = 1}: Imprimir entero (en \$a0).
+    \item \textbf{\$v0 = 4}: Imprimir cadena (dir en \$a0).
+    \item \textbf{\$v0 = 5}: Leer entero (retorna en \$v0).
+    \item \textbf{\$v0 = 10}: Terminar programa.
+\end{itemize}
+
+\end{multicols}
+
+\end{document}
