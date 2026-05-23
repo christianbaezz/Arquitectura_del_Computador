@@ -1,0 +1,113 @@
+\documentclass[11pt, letterpaper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage{amsmath, amssymb}
+\usepackage{geometry}
+\usepackage{tcolorbox}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{xcolor}
+\geometry{top=2.5cm, bottom=2.5cm, left=1.6cm, right=1.6cm}
+\setlength{\headheight}{24pt}
+
+% Recuadros de Fórmulas
+\tcbset{
+    colback=blue!5!white,
+    colframe=blue!60!black,
+    fonttitle=\bfseries,
+    arc=2mm,
+    boxrule=0.9pt,
+    top=3mm,
+    bottom=3mm,
+    left=3mm,
+    right=3mm
+}
+
+% Encabezado
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{\small \textbf{Arquitectura del Computador} \\ Facultad Experimental de Ciencias y Tecnología (FACYT)}
+\rhead{\small Formulario -- Capítulo 1 \\ \textbf{Christian Báez C.I. 31.473.355}}
+\cfoot{\thepage}
+\renewcommand{\headrulewidth}{0.5pt}
+
+% Estilo de las secciones
+\titleformat{\section}{\large\bfseries\color{blue!60!black}}{}{0pt}{}[\titlerule]
+\titlespacing*{\section}{0pt}{14pt}{8pt}
+
+\begin{document}
+
+\begin{center}
+    \Large\textbf{Formulario de Prestaciones y Rendimiento de la CPU} \\
+    \vskip 0.2cm
+    \small \textit{Referencia: Estructura y diseño de computadores: la interfaz software/hardware (Patterson \& Hennessy)}
+\end{center}
+
+\section{1. Definición de Prestaciones y Comparación de Rendimiento}
+
+Las prestaciones (rendimiento) de un computador se definen de manera inversa a su tiempo de respuesta o tiempo de ejecución:
+
+\begin{tcolorbox}[title=Relación Fundamental entre Prestaciones y Tiempo]
+$$\text{Prestaciones}_X = \frac{1}{\text{Tiempo de ejecución}_X}$$
+\end{tcolorbox}
+
+Si un computador $X$ es más rápido que un computador $Y$, se cumple que $\text{Prestaciones}_X > \text{Prestaciones}_Y$, por lo tanto:
+$$\frac{1}{\text{Tiempo de ejecución}_X} > \frac{1}{\text{Tiempo de ejecución}_Y} \implies \text{Tiempo de ejecución}_Y > \text{Tiempo de ejecución}_X$$
+
+\subsection*{Comparación Cuantitativa (``$n$ veces más rápido'')}
+Para indicar cuantitativamente cuántas veces es más rápida la máquina $X$ respecto a la máquina $Y$, se calcula el cociente de sus prestaciones:
+
+\begin{tcolorbox}
+$$\frac{\text{Prestaciones}_X}{\text{Prestaciones}_Y} = \frac{\text{Tiempo de ejecución}_Y}{\text{Tiempo de ejecución}_X} = n$$
+\end{tcolorbox}
+
+\section{2. Factores del Tiempo de Ejecución de la CPU}
+
+El rendimiento de la CPU depende directamente de los ciclos de reloj del programa y del periodo/frecuencia del hardware. Se calcula mediante estas dos expresiones equivalentes:
+
+\begin{tcolorbox}[title=Tiempo de CPU en función del Ciclo de Reloj]
+$$\text{Tiempo de ejecución de CPU} = \text{Ciclos de reloj de la CPU} \times \text{Tiempo del ciclo de reloj}$$
+\end{tcolorbox}
+
+\begin{tcolorbox}[title=Tiempo de CPU en función de la Frecuencia]
+$$\text{Tiempo de ejecución de CPU} = \frac{\text{Ciclos de reloj de la CPU}}{\text{Frecuencia de reloj}}$$
+\end{tcolorbox}
+\textit{Nota: La frecuencia de reloj es el inverso multiplicativo del tiempo de ciclo ($\text{Frecuencia} = 1 / \text{Tiempo de ciclo}$).}
+
+\section{3. La Ecuación Clásica de las Prestaciones de la CPU}
+
+Al desagregar los ciclos del programa introduciendo el \textbf{Número de instrucciones} y los ciclos promedio por instrucción (\textbf{CPI}), se obtiene la ecuación fundamental de la arquitectura:
+
+\begin{tcolorbox}[title=Ecuación Clásica de Rendimiento de la CPU]
+$$\text{Tiempo de ejecución} = \text{Número de instrucciones} \times \text{CPI} \times \text{Tiempo de ciclo}$$
+$$\text{Tiempo de ejecución} = \frac{\text{Número de instrucciones} \times \text{CPI}}{\text{Frecuencia de reloj}}$$
+\end{tcolorbox}
+
+\section{4. Cálculo de Ciclos Totales y CPI Promedio}
+
+Si un programa ejecuta diferentes mezclas de instrucciones donde cada clase posee un CPI específico, los ciclos totales de la CPU se modelan mediante una sumatoria discreta:
+
+\begin{tcolorbox}[title=Ciclos de Reloj Totales (Múltiples Clases)]
+$$\text{Ciclos de reloj de la CPU} = \sum_{i=1}^{n} (\text{CPI}_i \times C_i)$$
+\end{tcolorbox}
+Donde:
+\begin{itemize}
+    \item $C_i$ es el número de instrucciones ejecutadas pertenecientes a la \textbf{Clase $i$}.
+    \item $\text{CPI}_i$ es el promedio de \textbf{Ciclos por Instrucción} específico de la \textbf{Clase $i$}.
+\end{itemize}
+
+\subsection*{CPI Promedio Global del Programa}
+El CPI global ponderado del programa se determina dividiendo la sumatoria total de ciclos entre el volumen total de instrucciones:
+\begin{tcolorbox}
+$$\text{CPI} = \frac{\text{Ciclos de reloj de la CPU}}{\text{Número de instrucciones}} = \frac{\sum (\text{CPI}_i \times C_i)}{\text{Total de instrucciones}}$$
+\end{tcolorbox}
+
+\section{5. Descomposición Dimensional (Idea Clave)}
+
+Para comprobar la consistencia formal de las métricas, se utiliza el análisis dimensional de unidades para expresar el tiempo total en segundos por programa:
+
+\begin{tcolorbox}[title=Análisis de Unidades del Tiempo de Ejecución]
+$$\text{Tiempo} = \frac{\text{Segundos}}{\text{Programa}} = \frac{\text{Instrucciones}}{\text{Programa}} \times \frac{\text{Ciclos de reloj}}{\text{Instrucción}} \times \frac{\text{Segundos}}{\text{Ciclo de reloj}}$$
+\end{tcolorbox}
+
+\end{document}
