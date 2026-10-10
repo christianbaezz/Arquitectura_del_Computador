@@ -1,0 +1,220 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage{geometry}
+\geometry{top=2.5cm, bottom=2.5cm, left=3cm, right=3cm}
+\usepackage{graphicx}
+\usepackage{amsmath,amssymb}
+\usepackage{hyperref}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=black,
+    filecolor=magenta,      
+    urlcolor=blue,
+    citecolor=blue
+}
+
+\begin{document}
+
+% ==================
+% PORTADA
+% ==================
+\begin{titlepage}
+    \centering
+    {\large \textbf{UNIVERSIDAD DE CARABOBO}}\\[0.2cm]
+    {\large \textbf{FACULTAD DE CIENCIAS Y TECNOLOGÍA}}\\[0.2cm]
+    {\large \textbf{DEPARTAMENTO DE COMPUTACIÓN}}\\[0.2cm]
+    {\large \textbf{ARQUITECTURA DEL COMPUTADOR}}\\[2.5cm]
+
+    {\Huge \textbf{PRÁCTICA DE LABORATORIO \#4}}\\[4cm]
+
+    \begin{flushright}
+    {\large \textbf{Elaborado por:}}\\[0.3cm]
+    Jesús Torres --- C.I. 31.022.489\\[0.2cm]
+    Christian Báez --- C.I. 31.473.355\\[1.5cm]
+
+    {\large \textbf{Fecha:}}\\[0.3cm]
+    7 de octubre de 2026
+    \end{flushright}
+\end{titlepage}
+
+\newpage
+\tableofcontents
+\newpage
+
+% =======================
+% SECCIONES DEL INFORME 
+% =======================
+
+\section{Ciclo de una Interrupción de Hardware} 
+\textbf{1. Explique con un diagrama cómo funciona el ciclo de una interrupción de hardware (desde que ocurre el evento hasta que se atiende).} 
+
+A continuación se presenta el diagrama esquemático que ilustra el flujo y ciclo completo de atención de una interrupción de hardware:
+
+\begin{center}
+\small
+\setlength{\tabcolsep}{12pt}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{|c|}
+    \hline
+    \textbf{Periférico Externo} \\
+    \hline
+\end{tabular} \\[0.15cm]
+$\downarrow$ \textit{\scriptsize (1. Genera pulso de interrupción asíncrono)} \\[0.15cm]
+\begin{tabular}{|c|}
+    \hline
+    \textbf{Controlador de Hardware (IRQ)} \\
+    \hline
+\end{tabular} \\[0.15cm]
+$\downarrow$ \textit{\scriptsize (2. Activa la línea de solicitud hacia la CPU)} \\[0.15cm]
+\begin{tabular}{|c|}
+    \hline
+    \textbf{Procesador (CPU)} \\
+    \hline
+\end{tabular} \\[0.15cm]
+$\downarrow$ \textit{\scriptsize (3. Completa la instrucción actual en el pipeline)} \\[0.1cm]
+$\downarrow$ \textit{\scriptsize (4. Guarda PC en EPC y conmuta a Modo Kernel)} \\[0.15cm]
+\begin{tabular}{|c|}
+    \hline
+    \textbf{Vector de Excepciones / ISR (0x80000180)} \\
+    \hline
+\end{tabular} \\[0.15cm]
+$\downarrow$ \textit{\scriptsize (5. Salto automático a la Rutina de Servicio)} \\[0.15cm]
+\begin{tabular}{|c|}
+    \hline
+    \textbf{Software (ISR)} \\
+    \hline
+\end{tabular} $\longrightarrow$ \textit{\scriptsize (6. Guarda contexto, atiende periférico, restaura y ejecuta \texttt{eret})}
+\end{center}
+
+\vspace{0.3cm}
+\textbf{Descripción detallada del ciclo:}
+\begin{itemize}
+    \item \textbf{1. Ocurrencia:} Un dispositivo periférico (como un teclado o un temporizador) genera un evento físico o lógico y activa su señal de interrupción asíncrona. 
+    \item \textbf{2. Solicitud:} La señal viaja por una línea física de hardware hacia el controlador de interrupciones del sistema (IRQ). 
+    \item \textbf{3. Finalización de instrucción:} El procesador completa por completo la ejecución de la instrucción actual que se encuentra en curso dentro del pipeline. 
+    \item \textbf{4. Resguardo y Conmutación:} El hardware guarda la dirección de retorno en el registro \texttt{EPC} (Exception Program Counter) del Coprocesador 0, conmuta el estado operativo a modo kernel y deshabilita temporalmente las interrupciones globales. 
+    \item \textbf{5. Salto a la ISR:} El flujo del procesador se redirige obligatoriamente hacia la dirección del vector de excepciones (en MIPS estándar, típicamente \texttt{0x80000180}). 
+    \item \textbf{6. Atención y Retorno:} El software de la Rutina de Servicio de Interrupción (ISR) guarda los registros en la pila, atiende la solicitud del periférico, restaura los registros y ejecuta la instrucción especial \texttt{eret} para reanudar el flujo del programa interrumpido. 
+\end{itemize}
+
+
+\section{Gestión de E/S: Sondeo vs. Interrupciones} 
+\textbf{2. ¿Qué diferencias hay entre gestionar E/S con sondeo y hacerlo con interrupciones?} 
+
+\begin{itemize}
+    \item \textbf{Sondeo (\textit{Polling}):} El procesador se encarga de consultar de manera activa, cíclica y constante el registro de estado de un periférico para determinar si hay datos listos. Esto mantiene a la CPU ocupada en una espera pasiva inútil, desperdiciando ciclos de procesamiento valiosos. 
+    \item \textbf{Interrupciones:} El procesador se dedica a ejecutar tareas útiles. El periférico permanece inactivo hasta que ocurre un evento, momento en el cual envía una señal eléctrica (interrupción) para notificar a la CPU. La CPU interrumpe momentáneamente lo que hace, atiende el evento y retoma su labor anterior con alta eficiencia. 
+\end{itemize}
+
+
+\section{Ventajas de las Interrupciones en el Procesador} 
+\textbf{3. ¿Qué ventajas tiene el uso de interrupciones en términos de uso del procesador?}
+
+\begin{itemize}
+    \item Eliminación absoluta de la espera activa, evitando que la CPU desperdicie ciclos preguntando constantemente a dispositivos lentos. 
+    \item Mayor eficiencia global, permitiendo que la CPU ejecute procesos útiles de manera continua mientras los dispositivos operan en segundo plano. 
+    \item Capacidad de respuesta inmediata en tiempo real ante eventos críticos del entorno. 
+    \item Soporte fundamental para la multiprogramación y la multitarea en sistemas operativos modernos. 
+\end{itemize}
+
+
+\section{Registros Especiales en MIPS32} 
+\textbf{4. ¿Qué registros especiales se utilizan en MIPS32 para gestionar interrupciones?} 
+
+Para la gestión de excepciones e interrupciones, MIPS32 utiliza registros específicos ubicados en el Coprocesador 0 (CP0): 
+\begin{itemize}
+    \item \textbf{\texttt{Status}} (Registro CP0 12): Controla las máscaras de interrupción y la habilitación global del procesador. 
+    \item \textbf{\texttt{Cause}} (Registro CP0 13): Almacena el código específico que originó la última excepción o interrupción, además de las líneas de hardware pendientes. 
+    \item \textbf{\texttt{EPC}} (Registro CP0 14): Almacena la dirección virtual de la instrucción interrumpida o afectada. 
+    \item \textbf{\texttt{BadVAddr}} (Registro CP0 8): Guarda la dirección virtual de memoria que generó un fallo de direccionamiento (\textit{Address Error}). 
+\end{itemize}
+
+
+\section{Importancia de Guardar el Contexto} 
+\textbf{5. ¿Por qué es necesario guardar el contexto (registros) al entrar en una rutina de servicio?} 
+
+Porque la Rutina de Servicio de Interrupción (ISR) utiliza registros de propósito general (\texttt{\$t0}, \texttt{\$v0}, etc.) para realizar sus operaciones y cálculos internos. Si dichos registros no se respaldan previamente en la pila (\textit{stack}), la ISR sobrescribirá los valores que el programa principal estaba utilizando en ese instante, corrompiendo su estado y generando fallos graves o resultados incorrectos al retornar. 
+
+
+\section{Generación de Excepciones en MIPS32} 
+\textbf{6. Momentos en que pueden generarse excepciones en un sistema MIPS32.} 
+
+\begin{itemize}
+    \item[a)] \textbf{Situaciones que generan excepciones:} 
+    \begin{enumerate}
+        \item Desbordamiento aritmético en operaciones con signo. 
+        \item Fallo de dirección de memoria (\textit{Address Error} por accesos mal alineados o prohibidos).
+        \item Instrucción ilegal o código de operación no reconocido por la arquitectura. 
+        \item Llamadas al sistema o puntos de interrupción mediante instrucciones como \texttt{syscall} o \texttt{break}.
+        \end{enumerate}
+    
+    \item[b)] \textbf{Etapas del pipeline que pueden provocar excepciones:} 
+    \begin{itemize}
+        \item \textit{IF (Instruction Fetch):} Fallos de dirección o TLB al buscar la instrucción en memoria. 
+        \item \textit{ID (Instruction Decode):} Códigos de operación inválidos al decodificar la instrucción. 
+        \item \textit{EX (Execution):} Desbordamientos aritméticos detectados por la ALU.
+        \item \textit{MEM (Memory):} Errores de alineación o violaciones de permisos en operaciones de carga (\texttt{lw}) o almacenamiento (\texttt{sw}). 
+    \end{itemize}
+\end{itemize}
+
+
+\section{Estrategias de Tratamiento de Excepciones e Interrupciones} 
+\textbf{7. Estrategias de tratamiento de excepciones e interrupciones.} 
+
+\begin{itemize}
+    \item[a)] \textbf{Diferencias:} Las interrupciones son \textbf{asíncronas} (provienen de eventos externos al flujo del programa), mientras que las excepciones son \textbf{síncronas} (generadas de forma directa y predecible por la instrucción en ejecución).
+    
+    \item[b)] \textbf{Estrategias y redirección:} Se emplean estrategias centralizadas y vectoriales. La ejecución se redirige forzando el Contador de Programa (PC) a la dirección del manejador en modo kernel. El registro \texttt{EPC} (\textit{Exception Program Counter}) cumple la función fundamental de almacenar la dirección de retorno exacta para reanudar el flujo mediante la instrucción \texttt{eret}. 
+\end{itemize}
+
+
+\section{Habilitación de Interrupciones} 
+\textbf{8. Habilitación de interrupciones en dispositivos y procesador.} 
+
+\begin{itemize}
+    \item[a)] \textbf{Forma de habilitación:} 
+    \begin{itemize}
+        \item \textit{Teclado y Pantalla:} Activando el bit de habilitación de interrupción (\textit{Interrupt Enable}, bit 1) en sus respectivos registros de control MMIO. 
+        \item \textit{Procesador:} Modificando el registro \texttt{Status} del Coprocesador 0, activando el bit global \texttt{IE} (bit 0) y configurando las máscaras de interrupción de hardware correspondientes (bits 8 a 15).
+    \end{itemize}
+    
+    \item[b)] \textbf{Consecuencia de habilitar solo en dispositivos:} Si se habilitan las interrupciones en los dispositivos pero no en el procesador, las solicitudes de hardware serán ignoradas por completo, comportándose el sistema como si operara exclusivamente por sondeo. 
+\end{itemize}
+
+
+\section{Procesamiento de Interrupciones} 
+\textbf{9. Procesamiento de interrupciones.} 
+
+\begin{itemize}
+    \item[a)] \textbf{Ciclo de una interrupción de reloj:} Ocurre el pulso de reloj $\rightarrow$ La línea se activa $\rightarrow$ La CPU termina la instrucción actual $\rightarrow$ El hardware guarda el PC en \texttt{EPC} y salta al vector de interrupción (\texttt{0x80000180}) $\rightarrow$ La rutina salva los registros en la pila $\rightarrow$ Se procesa el evento del temporizador $\rightarrow$ Se restauran los registros $\rightarrow$ Se ejecuta la instrucción de retorno \texttt{eret}. El hardware automatiza el salto y resguardo de estados, mientras que el software (sistema operativo/ISR) gestiona la lógica de atención y restauración. 
+    
+    \item[b)] \textbf{Importancia del contexto:} Guardar el contexto garantiza la transparencia del sistema, asegurando que el programa interrumpido continúe su ejecución de manera intacta y sin pérdida de datos. 
+\end{itemize}
+
+
+\section{Interrupciones de Reloj y Control de Ejecución}
+\textbf{10. Interrupciones de reloj y control de ejecución.} 
+
+\begin{itemize}
+    \item[a)] \textbf{Usos del reloj:} Permiten implementar el reparto de tiempo (\textit{time-sharing}). Si un programa queda atrapado en un bucle infinito o agota su cuota de tiempo, la interrupción de reloj fuerza el control hacia el sistema operativo para suspenderlo o abortarlo. También actúan como mecanismos de control de tiempo (\textit{timeout}) para finalizar programas que superan su límite de ejecución. 
+    
+    \item[b)] \textbf{Acción del software al finalizar antes de tiempo:} Debe desarmar o deshabilitar el temporizador activo para evitar interrupciones espurias innecesarias una vez que el proceso ha finalizado.
+\end{itemize}
+
+
+\section{Análisis y Discusión de los Resultados} 
+
+\begin{itemize}
+    \item \textbf{Evaluación del Ejercicio 1 (Buffer Circular y Memoria Mapeada - MMIO):} 
+    La implementación del buffer circular de tamaño fijo demostró ser una solución eficiente y elegante para la gestión temporal de flujos de datos asíncronos en MIPS32. Al utilizar los registros de control y datos del simulador MMIO (\texttt{0xffff0000} y \texttt{0xffff0004}), el programa logró evaluar el estado del teclado de forma continua sin bloquear el ciclo de procesamiento. La aplicación de aritmética modular (\texttt{head = (head + 1) \% buf\_size}) permitió reutilizar de manera indefinida el espacio de almacenamiento asignado de 64 bytes. Asimismo, el mecanismo de filtrado condicional, acotando strictly el rango de códigos ASCII entre 65 y 90 (\texttt{A-Z}), garantizó que cualquier dígito, símbolo de puntuación o letra minúscula ingresada fuera descartado de forma transparente antes de alterar el buffer, cumpliendo a cabalidad con las especificaciones del diseño. 
+
+    \item \textbf{Evaluación del Ejercicio 2 (Máquina de Estados Temporizada del Semáforo):} 
+    La simulación del semáforo controlado por la tecla de entrada \texttt{s} evidenció la correcta estructuración lógica de una máquina de estados basada en duraciones fijas (20 segundos de transición, 10 segundos en amarillo y 30 segundos en rojo). Un aspecto crítico resuelto durante la ejecución fue el manejo del tiempo a través del \texttt{syscall 30} (milisegundos desde la época). Debido a la gran magnitud de los valores de tiempo devueltos por el simulador MARS, el uso de instrucciones aritméticas y de comparación sin signo (\texttt{subu} y \texttt{bgeu}) resultó fundamental para prevenir desbordamientos de signo (\textit{sign overflow}), asegurando que los retardos temporales transcurrieran con absoluta precisión cronométrica y sin interrupciones espurias.
+
+    \item \textbf{Implicaciones Prácticas y Arquitectónicas:} 
+    Ambos ejercicios permitieron contrastar la teoría del procesamiento de E/S en arquitecturas de computadores. Aunque la aproximación utilizada se basó en sondeo activo (\textit{polling}), el control estricto de intervalos de tiempo y la manipulación directa de estructuras de datos en bajo nivel reflejan cómo interactúan los programas de sistema con los controladores de periféricos. Estos laboratorios reafirman que un dominio preciso de los saltos condicionales, el manejo de punteros en memoria y la gestión de temporizadores son pilares indispensables para el posterior desarrollo de sistemas operativos y rutinas de atención por interrupciones en hardware real. 
+\end{itemize}
+
+\end{document}
